@@ -36,7 +36,7 @@ impl Parser {
     fn parse_expr(&self, e: &Sexp) -> Expr {
         match e {
             &Sexp::Atom(I(n)) => {
-                if n >= -4611686018427387904 && n < 4611686018427387904 {
+                if (-4611686018427387904..4611686018427387904).contains(&n) {
                     Expr::Number(n)
                 } else {
                     syntax_error("integer literal overflow")
@@ -66,7 +66,7 @@ impl Parser {
                 }
                 // (make-vec size elem)
                 [Sexp::Atom(S(keyword)), es @ ..] if keyword == "make-vec" => {
-                    let [size, elem] = &es[..] else {
+                    let [size, elem] = es else {
                         return syntax_error("malformed vec");
                     };
                     let size = self.parse_expr(size);
@@ -79,7 +79,7 @@ impl Parser {
                 }
                 // (vec-set! idx elem)
                 [Sexp::Atom(S(keyword)), es @ ..] if keyword == "vec-set!" => {
-                    let [vec, size, elem] = &es[..] else {
+                    let [vec, size, elem] = es else {
                         return syntax_error("malformed vec-set!");
                     };
                     let vec = self.parse_expr(vec);
@@ -89,7 +89,7 @@ impl Parser {
                 }
                 // (vec-get idx elem)
                 [Sexp::Atom(S(keyword)), es @ ..] if keyword == "vec-get" => {
-                    let [vec, idx] = &es[..] else {
+                    let [vec, idx] = es else {
                         return syntax_error("malformed vec-get");
                     };
                     let vec = self.parse_expr(vec);
@@ -98,7 +98,7 @@ impl Parser {
                 }
                 // (vec-len vec)
                 [Sexp::Atom(S(keyword)), es @ ..] if keyword == "vec-len" => {
-                    let [vec] = &es[..] else {
+                    let [vec] = es else {
                         return syntax_error("malformed vec-len");
                     };
                     let vec = self.parse_expr(vec);
@@ -116,7 +116,7 @@ impl Parser {
 
                 // (let <bindings> <expr>)
                 [Sexp::Atom(S(keyword)), es @ ..] if keyword == "let" => {
-                    let [e1, e2] = &es[..] else {
+                    let [e1, e2] = es else {
                         return syntax_error("malformed let");
                     };
                     match e1 {
@@ -141,7 +141,7 @@ impl Parser {
 
                 // if <expr> <expr> <expr> => If
                 [Sexp::Atom(S(keyword)), es @ ..] if keyword == "if" => {
-                    let [e1, e2, e3] = &es[..] else {
+                    let [e1, e2, e3] = es else {
                         syntax_error("malformed if")
                     };
                     let e1 = self.parse_expr(e1);

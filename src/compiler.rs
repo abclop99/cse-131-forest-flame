@@ -219,7 +219,7 @@ impl Session {
 
                 self.compile_expr(cx, Loc::Reg(Rax), e1);
                 self.emit_instrs([
-                    Instr::Cmp(BinArgs::ToReg(Rax, false.repr32().into())),
+                    Instr::Cmp(BinArgs::ToReg(Rax, false.repr32())),
                     Instr::Je(else_lbl.clone()),
                 ]);
                 self.compile_expr(cx, dst, e2);
@@ -563,7 +563,7 @@ impl Session {
                     Instr::Or(BinArgs::ToReg(Rdx, Arg32::Reg(Rcx))),
                     Instr::Test(BinArgs::ToReg(Rdx, Arg32::Imm(0b01))),
                     Instr::Jnz(INVALID_ARG.to_string()),
-                    Instr::Label(check_eq_finish_lbl.to_string()),
+                    Instr::Label(check_eq_finish_lbl),
                 ]);
             }
         }

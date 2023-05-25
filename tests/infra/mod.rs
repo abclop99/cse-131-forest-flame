@@ -135,7 +135,7 @@ fn run_static_error_test(name: &str, file: &Path, expected: &str) {
 fn compile(name: &str, file: &Path) -> Result<(), String> {
     // Run the compiler
     let compiler: PathBuf = ["target", "debug", env!("CARGO_PKG_NAME")].iter().collect();
-    let output = Command::new(&compiler)
+    let output = Command::new(compiler)
         .arg(file)
         .arg(&mk_path(name, Ext::Asm))
         .output()
@@ -155,7 +155,7 @@ fn compile(name: &str, file: &Path) -> Result<(), String> {
 }
 
 fn run(name: &str, input: Option<&str>, heap_size: Option<usize>) -> Result<String, String> {
-    let mut cmd = Command::new(&mk_path(name, Ext::Run));
+    let mut cmd = Command::new(mk_path(name, Ext::Run));
     if let Some(input) = input {
         cmd.arg(input);
     }

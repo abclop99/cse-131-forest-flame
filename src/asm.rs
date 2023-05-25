@@ -339,7 +339,7 @@ pub fn instr_to_string(i: &Instr) -> String {
         Instr::Label(s) => format!("{}:", s),
 
         Instr::Call(s) => format!("  call {s}"),
-        Instr::Ret => format!("  ret"),
+        Instr::Ret => "  ret".to_string(),
         Instr::Jmp(s) => format!("  jmp {s}"),
         Instr::Je(s) => format!("  je {s}"),
         Instr::Jne(s) => format!("  jne {s}"),
@@ -382,13 +382,13 @@ pub fn instr_to_string(i: &Instr) -> String {
             format!("  lea {}, {}", reg_to_string(*reg), mem_ref_to_string(*mem))
         }
         Instr::Rep(op) => format!("  rep {}", str_op_to_string(*op)),
-        Instr::Cqo => format!("  cqo"),
+        Instr::Cqo => "  cqo".to_string(),
     }
 }
 
 fn str_op_to_string(op: StrOp) -> String {
     match op {
-        StrOp::Stosq => format!("stosq"),
+        StrOp::Stosq => "stosq".to_string(),
     }
 }
 
