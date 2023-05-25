@@ -1,2 +1,4 @@
 /target
 tests/*dSYM
+config.txt
+/changelog
