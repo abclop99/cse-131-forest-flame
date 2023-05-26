@@ -25,6 +25,12 @@ success_tests! {
         expected: "1\n2\n3\n4\n5\n5\n4\n3\n2\n1\nnil"
     },
     {
+        name: make_vecs_succ_5,
+        file: "make_vecs.snek",
+        input: "5",
+        expected: "[]\n[1]\n[2, 2]\n[3, 3, 3]\n[4, 4, 4, 4]\n[5, 5, 5, 5, 5]",
+    },
+    {
         name: make_vecs_5_succ_0,
         file: "make_vecs.snek",
         input: "0",
@@ -43,14 +49,21 @@ success_tests! {
         file: "make_vecs.snek",
         input: "2",
         heap_size: 5,
-        expected: "[]\n[1]\n[1, 2]",
+        expected: "[]\n[1]\n[2, 2]",
     },
     {
         name: make_vecs_5_succ_3,
         file: "make_vecs.snek",
         input: "3",
         heap_size: 5,
-        expected: "[]\n[1]\n[1, 2],\n[1, 2, 3]",
+        expected: "[]\n[1]\n[2, 2]\n[3, 3, 3]",
+    },
+    {
+        name: make_vecs_20_succ_5,
+        file: "make_vecs.snek",
+        input: "5",
+        heap_size: 20,
+        expected: "[]\n[1]\n[2, 2]\n[3, 3, 3]\n[4, 4, 4, 4]\n[5, 5, 5, 5, 5]",
     },
 }
 

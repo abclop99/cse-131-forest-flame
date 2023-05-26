@@ -94,10 +94,29 @@ pub unsafe fn snek_try_gc(
 #[export_name = "\x01snek_gc"]
 pub unsafe fn snek_gc(
     heap_ptr: *const u64,
-    _stack_base: *const u64,
+    stack_base: *const u64,
     _curr_rbp: *const u64,
-    _curr_rsp: *const u64,
+    curr_rsp: *const u64,
 ) -> *const u64 {
+    unsafe fn find_roots(stack_base: &*const u64, curr_rsp: &*const u64) -> Vec<*const u64> {
+        let mut roots = Vec::new();
+
+        let mut ptr = stack_base.clone();
+
+        while ptr >= curr_rsp.clone() {
+            let val = *ptr;
+            if val & 1 == 1 && val != 1 {
+                roots.push(ptr);
+            }
+            ptr = ptr.sub(1);
+        }
+
+        roots
+    }
+
+    // Locate roots on the stack
+    let _roots = find_roots(&stack_base, &curr_rsp);
+
     heap_ptr
 }
 
