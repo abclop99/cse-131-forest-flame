@@ -71,14 +71,22 @@ pub unsafe extern "C" fn snek_print(val: SnekVal) -> SnekVal {
 ///
 #[export_name = "\x01snek_try_gc"]
 pub unsafe fn snek_try_gc(
-    _count: isize,
-    _heap_ptr: *const u64,
-    _stack_base: *const u64,
-    _curr_rbp: *const u64,
-    _curr_rsp: *const u64,
+    count: isize,
+    heap_ptr: *const u64,
+    stack_base: *const u64,
+    curr_rbp: *const u64,
+    curr_rsp: *const u64,
 ) -> *const u64 {
-    eprintln!("out of memory");
-    std::process::exit(ErrCode::OutOfMemory as i32)
+    // Call the garbage collector here and return the new heap pointer
+    let heap_ptr = snek_gc(heap_ptr, stack_base, curr_rbp, curr_rsp);
+
+    // Check if there's enough space to allocate `count` words
+    if heap_ptr.add(8 * count as usize) > HEAP_END {
+        eprintln!("out of memory");
+        std::process::exit(ErrCode::OutOfMemory as i32)
+    }
+
+    heap_ptr
 }
 
 /// This function should trigger garbage collection and return the updated heap pointer (i.e., the new
