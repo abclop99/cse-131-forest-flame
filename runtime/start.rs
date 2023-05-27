@@ -1,4 +1,4 @@
-use std::{collections::HashSet, env};
+use std::{collections::HashSet, env, convert::TryInto};
 
 type SnekVal = u64;
 
@@ -98,24 +98,57 @@ pub unsafe fn snek_gc(
     _curr_rbp: *const u64,
     curr_rsp: *const u64,
 ) -> *const u64 {
-    unsafe fn find_roots(stack_base: &*const u64, curr_rsp: &*const u64) -> Vec<*const u64> {
-        let mut roots = Vec::new();
+    /// Finds all the roots on the stack. A root is a heap-allocated value
+    /// that is directly referenced by a stack value.
+    /// Returns a vector of pointers to the pointers on the stack.
+    unsafe fn find_root_ptrs(stack_base: &*const u64, curr_rsp: &*const u64) -> Vec<*const SnekVal> {
+        let mut root_ptrs = Vec::new();
 
         let mut ptr = stack_base.clone();
 
         while ptr >= curr_rsp.clone() {
             let val = *ptr;
             if val & 1 == 1 && val != 1 {
-                roots.push(ptr);
+                root_ptrs.push(ptr as *const SnekVal);
             }
             ptr = ptr.sub(1);
         }
 
-        roots
+        root_ptrs
+    }
+
+    /// root_ptr is a pointer to the beginning of a heap-allocated vec.
+    unsafe fn mark(root_ptr: *mut u64) {
+        let gc_word = &mut *root_ptr;
+        let size = *root_ptr.add(1);
+
+        // Check if the vector has already been marked
+        if *gc_word & 1 == 1 {
+            return;
+        }
+
+        // Mark the vector
+        *gc_word = 1;
+
+        // Mark the elements of the vector
+        for i in 0..size {
+            let val = *root_ptr.add((2 + i).try_into().unwrap());
+            if val & 1 == 1 && val != 1 {
+                mark(val as *mut u64);
+            }
+        }
     }
 
     // Locate roots on the stack
-    let _roots = find_roots(&stack_base, &curr_rsp);
+    let root_ptrs = find_root_ptrs(&stack_base, &curr_rsp);
+
+    // Mark all the reachable objects
+    for root_ptr in root_ptrs {
+        let root_addr = (*root_ptr - 1) as *mut u64;
+        mark(root_addr);
+    }
+
+    eprintln!("Not implemented: snek_gc");
 
     heap_ptr
 }
