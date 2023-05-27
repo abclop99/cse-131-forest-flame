@@ -118,14 +118,19 @@ pub unsafe fn snek_gc(
     }
 
     /// root_ptr is a pointer to the beginning of a heap-allocated vec.
-    unsafe fn mark(root_ptr: *mut u64) {
+    /// Returns a vector of pointers to the vecs on the heap.
+    unsafe fn mark(root_ptr: *mut u64) -> Vec<*mut u64> {
         let gc_word = &mut *root_ptr;
         let size = *root_ptr.add(1);
 
+        let mut vec_ptrs = Vec::new();
+
         // Check if the vector has already been marked
         if *gc_word & 1 == 1 {
-            return;
+            return vec_ptrs;
         }
+
+        vec_ptrs.push(root_ptr);
 
         // Mark the vector
         *gc_word = 1;
@@ -134,19 +139,33 @@ pub unsafe fn snek_gc(
         for i in 0..size {
             let val = *root_ptr.add((2 + i).try_into().unwrap());
             if val & 1 == 1 && val != 1 {
-                mark(val as *mut u64);
+                let val = val - 1;
+                vec_ptrs.append(&mut mark(val as *mut u64));
             }
         }
+
+        vec_ptrs
     }
+
+    //unsafe fn fwd_headers()
+    
+    eprintln!("starting snek_gc");
 
     // Locate roots on the stack
     let root_ptrs = find_root_ptrs(&stack_base, &curr_rsp);
 
+    eprintln!("root_ptrs: {:?}", root_ptrs);
+
+    let mut vec_ptrs: Vec<*mut u64> = Vec::new();
+
     // Mark all the reachable objects
     for root_ptr in root_ptrs {
         let root_addr = (*root_ptr - 1) as *mut u64;
-        mark(root_addr);
+        eprintln!("\troot_addr: {:?}", root_addr);
+        vec_ptrs.append(&mut mark(root_addr));
     }
+
+    eprintln!("vec_ptrs: {:?}", vec_ptrs);
 
     eprintln!("Not implemented: snek_gc");
 
