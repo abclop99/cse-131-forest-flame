@@ -165,6 +165,15 @@ pub unsafe fn snek_gc(
         vec_ptrs.append(&mut mark(root_addr));
     }
 
+    // Sort the vector pointers
+    vec_ptrs.sort_unstable();
+    // Assert that there are no duplicates
+    debug_assert!({
+        let len = vec_ptrs.len();
+        vec_ptrs.dedup();
+        len == vec_ptrs.len()
+    }, "mark returned duplicate pointers");
+
     eprintln!("vec_ptrs: {:?}", vec_ptrs);
 
     eprintln!("Not implemented: snek_gc");
