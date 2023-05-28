@@ -147,7 +147,21 @@ pub unsafe fn snek_gc(
         vec_ptrs
     }
 
-    //unsafe fn fwd_headers()
+    /// Sets the to addresses in the gc words of the vectors to the new locations
+    unsafe fn fwd_headers(move_from: &Vec<*mut u64>) {
+        let mut move_to = HEAP_START as *mut u64;
+
+        for from in move_from {
+            let size = *(*from).add(1);
+
+            // Set the forwarding pointer to the new location
+            debug_assert!(**from == 1, "gc word is not marked or wrong");
+            **from = move_to as u64 + 1;
+
+            // Increment the move_to pointer according to the size of the vector
+            move_to = move_to.add((2 + size).try_into().unwrap());
+        }
+    }
     
     eprintln!("starting snek_gc");
 
@@ -175,6 +189,8 @@ pub unsafe fn snek_gc(
     }, "mark returned duplicate pointers");
 
     eprintln!("vec_ptrs: {:?}", vec_ptrs);
+
+    fwd_headers(&vec_ptrs);
 
     eprintln!("Not implemented: snek_gc");
 
