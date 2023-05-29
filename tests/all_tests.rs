@@ -65,6 +65,30 @@ success_tests! {
         heap_size: 20,
         expected: "[]\n[1]\n[2, 2]\n[3, 3, 3]\n[4, 4, 4, 4]\n[5, 5, 5, 5, 5]",
     },
+    {
+        name: make_linked_lists_5_60_succ,
+        file: "make_linked_lists.snek",
+        input: "5",
+        heap_size: 60,
+        expected: "nil
+[0, nil]
+[0, [1, nil]]
+[0, [1, [2, nil]]]
+[0, [1, [2, [3, nil]]]]
+[0, [1, [2, [3, [4, nil]]]]]"
+    },
+    {
+        name: make_linked_lists_5_20_succ,
+        file: "make_linked_lists.snek",
+        input: "5",
+        heap_size: 20,
+        expected: "nil
+[0, nil]
+[0, [1, nil]]
+[0, [1, [2, nil]]]
+[0, [1, [2, [3, nil]]]]
+[0, [1, [2, [3, [4, nil]]]]]"
+    },
 }
 
 runtime_error_tests! {

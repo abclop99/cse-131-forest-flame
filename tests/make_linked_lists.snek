@@ -1,0 +1,16 @@
+(fun (range start end)
+	(if (>= start end)
+		nil
+		(vec start (range (+ start 1) end))
+	)
+)
+
+(let ((i 0))
+	(loop (if (>= i input)
+		(break (range 0 i))
+		(block
+			(print (range 0 i))
+			(set! i (+ i 1))
+		)
+	))
+)
