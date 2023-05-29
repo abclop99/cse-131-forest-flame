@@ -101,7 +101,7 @@ pub unsafe fn snek_gc(
     /// Finds all the roots on the stack. A root is a heap-allocated value
     /// that is directly referenced by a stack value.
     /// Returns a vector of pointers to the pointers on the stack.
-    unsafe fn find_root_ptrs(stack_base: &*const u64, curr_rsp: &*const u64) -> Vec<*const SnekVal> {
+    unsafe fn find_root_ptrs(stack_base: &*const u64, curr_rsp: &*const u64) -> Vec<*mut SnekVal> {
         let mut root_ptrs = Vec::new();
 
         let mut ptr = stack_base.clone();
@@ -109,7 +109,7 @@ pub unsafe fn snek_gc(
         while ptr >= curr_rsp.clone() {
             let val = *ptr;
             if val & 1 == 1 && val != 1 {
-                root_ptrs.push(ptr as *const SnekVal);
+                root_ptrs.push(ptr as *mut SnekVal);
             }
             ptr = ptr.sub(1);
         }
@@ -162,20 +162,37 @@ pub unsafe fn snek_gc(
             move_to = move_to.add((2 + size).try_into().unwrap());
         }
     }
+
+    /// Replace a reference to a vector with a reference to the new location of the vector
+    unsafe fn fwd_reference(ptr: &mut SnekVal) {
+        let gc_word = *((*ptr - 1) as *mut u64);
+        *ptr = gc_word;
+    }
+
+    /// Replace all references to vectors in a vector with references to the new
+    /// locations of the vectors
+    unsafe fn fwd_vec(vec_ptr: *mut u64) {
+        let size = *vec_ptr.add(1);
+
+        for i in 0..size {
+            let val = &mut *vec_ptr.add((2 + i).try_into().unwrap());
+
+            if *val & 1 == 1 && *val != 1 {
+                fwd_reference(val);
+            }
+        }
+    }
     
     eprintln!("starting snek_gc");
 
     // Locate roots on the stack
     let root_ptrs = find_root_ptrs(&stack_base, &curr_rsp);
 
-    eprintln!("root_ptrs: {:?}", root_ptrs);
-
     let mut vec_ptrs: Vec<*mut u64> = Vec::new();
 
     // Mark all the reachable objects
-    for root_ptr in root_ptrs {
-        let root_addr = (*root_ptr - 1) as *mut u64;
-        eprintln!("\troot_addr: {:?}", root_addr);
+    for root_ptr in &root_ptrs {
+        let root_addr = (**root_ptr - 1) as *mut u64;
         vec_ptrs.append(&mut mark(root_addr));
     }
 
@@ -188,9 +205,19 @@ pub unsafe fn snek_gc(
         len == vec_ptrs.len()
     }, "mark returned duplicate pointers");
 
-    eprintln!("vec_ptrs: {:?}", vec_ptrs);
-
     fwd_headers(&vec_ptrs);
+
+    // Forward the references in the stack
+    for root_ptr in &root_ptrs {
+        fwd_reference(&mut **root_ptr);
+    }
+    
+    // Forward the references in the heap
+    for vec_ptr in &vec_ptrs {
+        fwd_vec(*vec_ptr);
+    }
+
+    // Compact the heap by moving the vectors
 
     eprintln!("Not implemented: snek_gc");
 
