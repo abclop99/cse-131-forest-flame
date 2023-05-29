@@ -81,7 +81,7 @@ pub unsafe fn snek_try_gc(
     let heap_ptr = snek_gc(heap_ptr, stack_base, curr_rbp, curr_rsp);
 
     // Check if there's enough space to allocate `count` words
-    if heap_ptr.add(8 * count as usize) > HEAP_END {
+    if heap_ptr.add(count as usize) > HEAP_END {
         eprintln!("out of memory");
         std::process::exit(ErrCode::OutOfMemory as i32)
     }
@@ -93,7 +93,7 @@ pub unsafe fn snek_try_gc(
 /// value of `%r15`). See [`snek_try_gc`] for a description of the meaning of the arguments.
 #[export_name = "\x01snek_gc"]
 pub unsafe fn snek_gc(
-    heap_ptr: *const u64,
+    _heap_ptr: *const u64,
     stack_base: *const u64,
     _curr_rbp: *const u64,
     curr_rsp: *const u64,
@@ -183,8 +183,6 @@ pub unsafe fn snek_gc(
         }
     }
     
-    eprintln!("starting snek_gc");
-
     // Locate roots on the stack
     let root_ptrs = find_root_ptrs(&stack_base, &curr_rsp);
 
@@ -218,8 +216,27 @@ pub unsafe fn snek_gc(
     }
 
     // Compact the heap by moving the vectors
+    let mut heap_ptr = HEAP_START;
+    for vec_ptr in &vec_ptrs {
+        let from = *vec_ptr;
+        let to = (**vec_ptr - 1) as *mut u64;
 
-    eprintln!("Not implemented: snek_gc");
+        let size = *from.add(1);
+
+        // Set the gc word to 0
+        *from = 0;
+
+        // Move the size and elements
+        for i in 1..(size + 2) {
+            let i = i.try_into().unwrap();
+            *to.add(i) = *from.add(i);
+        }
+
+        // Set heap_ptr to the next free location
+        heap_ptr = heap_ptr.add((2 + size).try_into().unwrap());
+    }
+
+    //eprintln!("Not implemented: snek_gc");
 
     heap_ptr
 }
