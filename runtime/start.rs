@@ -236,7 +236,12 @@ pub unsafe fn snek_gc(
         heap_ptr = heap_ptr.add((2 + size).try_into().unwrap());
     }
 
-    //eprintln!("Not implemented: snek_gc");
+    // Fill the rest of the heap with nil
+    let mut fill_ptr = heap_ptr as *mut u64;
+    while *fill_ptr < *HEAP_END {
+        *fill_ptr = 1;
+        fill_ptr = fill_ptr.add(1);
+    }
 
     heap_ptr
 }
