@@ -77,6 +77,7 @@ pub unsafe fn snek_try_gc(
     curr_rbp: *const u64,
     curr_rsp: *const u64,
 ) -> *const u64 {
+
     // Call the garbage collector here and return the new heap pointer
     let heap_ptr = snek_gc(heap_ptr, stack_base, curr_rbp, curr_rsp);
 
@@ -109,7 +110,10 @@ pub unsafe fn snek_gc(
         while ptr >= curr_rsp.clone() {
             let val = *ptr;
             if val & 1 == 1 && val != 1 {
-                root_ptrs.push(ptr as *mut SnekVal);
+                let vec_ptr = (val - 1) as *const u64;
+                if HEAP_START <= vec_ptr && vec_ptr < HEAP_END {
+                    root_ptrs.push(ptr as *mut SnekVal);
+                }
             }
             ptr = ptr.sub(1);
         }
@@ -236,13 +240,6 @@ pub unsafe fn snek_gc(
         heap_ptr = heap_ptr.add((2 + size).try_into().unwrap());
     }
 
-    // Fill the rest of the heap with nil
-    let mut fill_ptr = heap_ptr as *mut u64;
-    while *fill_ptr < *HEAP_END {
-        *fill_ptr = 1;
-        fill_ptr = fill_ptr.add(1);
-    }
-
     heap_ptr
 }
 
@@ -256,6 +253,18 @@ pub unsafe fn snek_print_stack(stack_base: *const u64, _curr_rbp: *const u64, cu
         let val = *ptr;
         println!("{ptr:?}: {:#0x}", val);
         ptr = ptr.sub(1);
+    }
+    println!("-----------------------------------------");
+}
+
+/// A helper function that prints the heap.
+pub unsafe fn snek_print_heap() {
+    let mut ptr = HEAP_START;
+    println!("-----------------------------------------");
+    while ptr < HEAP_END {
+        let val = *ptr;
+        println!("{ptr:?}: {:#x}", val);
+        ptr = ptr.add(1);
     }
     println!("-----------------------------------------");
 }
