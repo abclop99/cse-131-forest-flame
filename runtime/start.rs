@@ -186,6 +186,34 @@ pub unsafe fn snek_gc(
             }
         }
     }
+
+    /// Compact the heap by moving all the vectors to the forwarded locations.
+    /// Expects a sorted vector of pointers to the vectors on the heap.
+    /// Returns the new heap pointer.
+    unsafe fn compact(vec_ptrs: &Vec<*mut u64>) -> *const u64 {
+        let mut heap_ptr = HEAP_START;
+
+        for vec_ptr in vec_ptrs {
+            let from = *vec_ptr;
+            let to = (**vec_ptr - 1) as *mut u64;
+
+            let size = *from.add(1);
+
+            // Set the gc word to 0
+            *from = 0;
+
+            // Copy the size and the elements of the vector
+            for i in 1..(2 + size) {
+                let i = i.try_into().unwrap();
+                *to.add(i) = *from.add(i);
+            }
+
+            // Set the heap pointer to the next free location
+            heap_ptr = heap_ptr.add((2 + size).try_into().unwrap());
+        }
+
+        heap_ptr
+    }
     
     // Locate roots on the stack
     let root_ptrs = find_root_ptrs(&stack_base, &curr_rsp);
@@ -220,25 +248,7 @@ pub unsafe fn snek_gc(
     }
 
     // Compact the heap by moving the vectors
-    let mut heap_ptr = HEAP_START;
-    for vec_ptr in &vec_ptrs {
-        let from = *vec_ptr;
-        let to = (**vec_ptr - 1) as *mut u64;
-
-        let size = *from.add(1);
-
-        // Set the gc word to 0
-        *from = 0;
-
-        // Move the size and elements
-        for i in 1..(size + 2) {
-            let i = i.try_into().unwrap();
-            *to.add(i) = *from.add(i);
-        }
-
-        // Set heap_ptr to the next free location
-        heap_ptr = heap_ptr.add((2 + size).try_into().unwrap());
-    }
+    let heap_ptr = compact(&vec_ptrs);
 
     heap_ptr
 }
