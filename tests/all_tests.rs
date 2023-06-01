@@ -89,6 +89,30 @@ success_tests! {
 [0, [1, [2, [3, nil]]]]
 [0, [1, [2, [3, [4, nil]]]]]"
     },
+    {
+        name: alternating_gc_5_60_succ,
+        file: "alternating_gc.snek",
+        input: "5",
+        heap_size: 60,
+        expected: "nil
+[0, nil]
+[0, [1, nil]]
+[0, [1, [2, nil]]]
+[0, [1, [2, [3, nil]]]]
+[0, [1, [2, [3, [4, nil]]]]]"
+    },
+    {
+        name: alternating_gc_5_20_succ,
+        file: "alternating_gc.snek",
+        input: "5",
+        heap_size: 20,
+        expected: "nil
+[0, nil]
+[0, [1, nil]]
+[0, [1, [2, nil]]]
+[0, [1, [2, [3, nil]]]]
+[0, [1, [2, [3, [4, nil]]]]]"
+    },
 }
 
 runtime_error_tests! {
@@ -117,6 +141,20 @@ runtime_error_tests! {
         file: "make_vecs.snek",
         input: "5",
         heap_size: 5,
+        expected: "out of memory",
+    },
+    {
+        name: make_linked_lists_5_19_oom,
+        file: "make_linked_lists.snek",
+        input: "5",
+        heap_size: 19,
+        expected: "out of memory",
+    },
+    {
+        name: alternating_gc_5_19_oom,
+        file: "alternating_gc.snek",
+        input: "5",
+        heap_size: 19,
         expected: "out of memory",
     },
 }

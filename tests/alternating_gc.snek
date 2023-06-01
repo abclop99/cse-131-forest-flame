@@ -1,0 +1,23 @@
+(fun (cons l r)
+	(block
+		(vec l r)
+		(vec l r)
+	)
+)
+
+(fun (range start end)
+	(if (>= start end)
+		nil
+		(cons start (range (+ start 1) end))
+	)
+)
+
+(let ((i 0))
+	(loop (if (= i 5)
+		(break (range 0 5))
+		(block
+			(print (range 0 i))
+			(set! i (+ i 1))
+		)
+	))
+)
