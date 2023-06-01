@@ -113,6 +113,13 @@ success_tests! {
 [0, [1, [2, [3, nil]]]]
 [0, [1, [2, [3, [4, nil]]]]]"
     },
+    {
+        name: cleanup_nested_succ,
+        file: "cleanup_nested.snek",
+        input: "1000",
+        heap_size: 4008,
+        expected: "1000",
+    },
 }
 
 runtime_error_tests! {
@@ -155,6 +162,13 @@ runtime_error_tests! {
         file: "alternating_gc.snek",
         input: "5",
         heap_size: 19,
+        expected: "out of memory",
+    },
+    {
+        name: cleanup_nested_oom,
+        file: "cleanup_nested.snek",
+        input: "1000",
+        heap_size: 4007,
         expected: "out of memory",
     },
 }
