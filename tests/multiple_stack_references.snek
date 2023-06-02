@@ -1,0 +1,23 @@
+(fun (pair a b) (block
+	(vec a b)
+	(vec a b)
+))
+
+(let ((i 5))
+	(loop (if (<= i 0)
+		(break nil)
+		(block
+			(let ((a1 (pair i nil)) (b1 (pair (+ i 1) nil)))
+				(let ((a2 a1) (b2 b1))
+					(block
+						(print a1)
+						(print a2)
+						(print b1)
+						(print b2)
+					)
+				)
+			)
+			(set! i (- i 1))
+		)
+	))
+)

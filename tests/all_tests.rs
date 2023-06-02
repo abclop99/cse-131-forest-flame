@@ -137,6 +137,33 @@ success_tests! {
 [1, 0, 2, [...], [...]]
 nil"
     },
+    {
+        name: multiple_stack_references_succ,
+        file: "multiple_stack_references.snek",
+        input: "false",
+        heap_size: 8,
+        expected: "[5, nil]
+[5, nil]
+[6, nil]
+[6, nil]
+[4, nil]
+[4, nil]
+[5, nil]
+[5, nil]
+[3, nil]
+[3, nil]
+[4, nil]
+[4, nil]
+[2, nil]
+[2, nil]
+[3, nil]
+[3, nil]
+[1, nil]
+[1, nil]
+[2, nil]
+[2, nil]
+nil"
+    },
 }
 
 runtime_error_tests! {
@@ -193,6 +220,13 @@ runtime_error_tests! {
         file: "multiple_cycles.snek",
         input: "1",
         heap_size: 6,
+        expected: "out of memory",
+    },
+    {
+        name: multiple_stack_references_oom,
+        file: "multiple_stack_references.snek",
+        input: "false",
+        heap_size: 7,
         expected: "out of memory",
     },
 }
