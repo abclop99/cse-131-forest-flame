@@ -1,0 +1,22 @@
+(fun (tree root l r)
+	(let ((t (vec root l r nil nil)))
+		(block
+			(vec-set! t 3 t)
+			(vec-set! t 4 t)
+			t
+		)
+	)
+)
+(fun (root t) (vec-get t 0))
+(fun (left t) (vec-get t 1))
+(fun (right t) (vec-get t 2))
+
+(let ((i 10))
+	(loop (if (<= i 0)
+		(break nil)
+		(block
+			(print (tree i (- i 1) (+ i 1)))
+			(set! i (- i 1))
+		)
+	))
+)

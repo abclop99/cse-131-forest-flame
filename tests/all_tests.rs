@@ -120,6 +120,23 @@ success_tests! {
         heap_size: 4008,
         expected: "1000",
     },
+    {
+        name: multiple_cycles_succ,
+        file: "multiple_cycles.snek",
+        input: "1",
+        heap_size: 7,
+        expected: "[10, 9, 11, [...], [...]]
+[9, 8, 10, [...], [...]]
+[8, 7, 9, [...], [...]]
+[7, 6, 8, [...], [...]]
+[6, 5, 7, [...], [...]]
+[5, 4, 6, [...], [...]]
+[4, 3, 5, [...], [...]]
+[3, 2, 4, [...], [...]]
+[2, 1, 3, [...], [...]]
+[1, 0, 2, [...], [...]]
+nil"
+    },
 }
 
 runtime_error_tests! {
@@ -169,6 +186,13 @@ runtime_error_tests! {
         file: "cleanup_nested.snek",
         input: "1000",
         heap_size: 4007,
+        expected: "out of memory",
+    },
+    {
+        name: multiple_cycles_oom,
+        file: "multiple_cycles.snek",
+        input: "1",
+        heap_size: 6,
         expected: "out of memory",
     },
 }
